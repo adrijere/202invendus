@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+# -*- coding: latin-1 -*-
+
+import sys
+from math import *
+
+X = [x for x in range(10, 60, 10)]
+Y = X
+Z = [z for z in range(20, 110, 10)]
+
+def checkArgs(a, b):
+	if a.isdigit() and b.isdigit():
+		if int(a) > 50 and int(b) > 50:
+			return True
+		else:
+			raise RuntimeError('Integers must be higher than 50.')
+	raise RuntimeError('Arguments must be integers.')
+	return False
+
+def jointDistribution(a, b):
+	results = list()
+	for y in Y:
+		for x in X:
+			result = ((a - x) * (b - y)) / ((5 * a - 150) * (5 * b - 150))
+			results.append(result)
+	return (results)
+
+def marginalDistributionY(results):
+	resultsY = list()
+	resultsSum = 0
+	cnt = 1
+	for result in results:
+		resultsSum += result
+		if cnt % len(Y) == 0:
+			resultsY.append(resultsSum)
+			resultsSum = 0
+		cnt += 1
+	return resultsY
+
+def marginalDistributionX(results):
+	resultsX = [0 for x in range(5)]
+	cnt = 0
+	for result in results:
+		if cnt == len(X):
+			cnt = 0
+		resultsX[cnt] += result
+		cnt += 1;
+	return resultsX
+
+def probDistZ(a, b):
+	resultsZ = dict()
+	for z in Z:
+		resultsZ[z] = 0
+	for y in Y:
+		for x in X:
+			resultsZ[x+y] += ((a - x) * (b - y)) / ((5 * a - 150) * (5 * b - 150))
+	return (resultsZ)
+
+def calcEsp(a):
+	var_esp = 0
+	for x in X:
+		var_esp += (x * ((a - x) / ((5 * a) - 150)))
+	return var_esp
+
+def calcVar(a, var_esp):
+	variance = 0
+	for x in X:
+		variance += pow(x, 2) * ((a - x) / ((5 * a) - 150))
+	variance -= pow(var_esp, 2);
+	return variance
+
+def convertToString(number):
+	numberConverted = str(round(number, 3)).rstrip('0')
+	numberLength = len(numberConverted)
+	if numberConverted[numberLength - 1] == '.':
+		numberConverted = numberConverted.replace(".", "")
+	return numberConverted
+
+
+def affResultat(a, b):
+	results = jointDistribution(a, b)
+	resultsX = marginalDistributionX(results)
+	resultsY = marginalDistributionY(results)
+	resultsZ = probDistZ(a, b)
+	print("\n\t", end="")
+	for x in X:
+		print("\tX = %d" % x, end="")
+	print("\tLoi de Y\t")
+	i = 0
+	cnt = 0
+	for result in results:
+		if cnt % len(Y) == 0:
+			print("Y = %d\t" % Y[i], end="")
+		cnt += 1
+		print("\t%s" % convertToString(result), end="")
+		if cnt % len(Y) == 0:
+			print("\t%s" % convertToString(resultsY[i]))
+			i += 1
+	print("Loi de X", end="")
+	for resultX in resultsX:
+		print("\t%s" % convertToString(resultX), end="")
+	print("\t%d" % 1)
+	total = 0
+	print("\nz\t\t", end="")
+	for z in Z:
+		print("%d\t" % z, end="")
+	print("Total\t\t")
+	print("p(Z=z)\t\t", end="")
+	for z in Z:
+		print("%s\t" % convertToString(resultsZ[z]), end="")
+		total += resultsZ[z]
+	print("%.0f" % total)
+	print()
+	var_esp = calcEsp(a)
+	variance = calcVar(a, var_esp)
+	print("Espérance de X : \t%s" % convertToString(var_esp))
+	print("Variance de X : \t%s" % convertToString(variance))
+	var_esp = calcEsp(b)
+	variance = calcVar(b, var_esp)
+	print("Espérance de Y : \t%s" % convertToString(var_esp))
+	print("Variance de Y : \t%s" % convertToString(variance))
+	var_esp = 0
+	variance = 0
+	for z in range(20, 110, 10):
+		var_esp += z * resultsZ[z]
+		if (z >= 20):
+			variance += pow(z, 2) * resultsZ[z]
+	variance -= pow(var_esp, 2)
+	print("Espérance de Z : \t%s" % convertToString(var_esp))
+	print("Variance de Z : \t%s" % convertToString(variance))
+
+def main():
+	try:
+		if len(sys.argv) != 3:
+			print("Usage: ./202invendus <a> <b>")
+		else:
+			if checkArgs(sys.argv[1], sys.argv[2]) is True:
+				affResultat(int(sys.argv[1]), int(sys.argv[2]))
+		return True
+	except Exception as err:
+ 		sys.stderr.write("ERROR: %s\nProgram is exiting now.\n" % str(err))
+ 		return False
+
+if __name__ == '__main__':
+	sys.exit(main())
