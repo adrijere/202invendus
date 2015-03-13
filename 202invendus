@@ -17,6 +17,14 @@ def checkArgs(a, b):
 	raise RuntimeError('Arguments must be integers.')
 	return False
 
+
+def convertToString(number):
+	numberConverted = str(round(number, 3)).rstrip('0')
+	numberLength = len(numberConverted)
+	if numberConverted[numberLength - 1] == '.':
+		numberConverted = numberConverted.replace(".", "")
+	return numberConverted
+
 def jointDistribution(a, b):
 	results = list()
 	for y in Y:
@@ -24,6 +32,16 @@ def jointDistribution(a, b):
 			result = ((a - x) * (b - y)) / ((5 * a - 150) * (5 * b - 150))
 			results.append(result)
 	return (results)
+
+def marginalDistributionX(results):
+	resultsX = [0 for x in range(5)]
+	cnt = 0
+	for result in results:
+		if cnt == len(X):
+			cnt = 0
+		resultsX[cnt] += result
+		cnt += 1;
+	return resultsX
 
 def marginalDistributionY(results):
 	resultsY = list()
@@ -36,16 +54,6 @@ def marginalDistributionY(results):
 			resultsSum = 0
 		cnt += 1
 	return resultsY
-
-def marginalDistributionX(results):
-	resultsX = [0 for x in range(5)]
-	cnt = 0
-	for result in results:
-		if cnt == len(X):
-			cnt = 0
-		resultsX[cnt] += result
-		cnt += 1;
-	return resultsX
 
 def probDistZ(a, b):
 	resultsZ = dict()
@@ -68,14 +76,6 @@ def calcVar(a, var_esp):
 		variance += pow(x, 2) * ((a - x) / ((5 * a) - 150))
 	variance -= pow(var_esp, 2);
 	return variance
-
-def convertToString(number):
-	numberConverted = str(round(number, 3)).rstrip('0')
-	numberLength = len(numberConverted)
-	if numberConverted[numberLength - 1] == '.':
-		numberConverted = numberConverted.replace(".", "")
-	return numberConverted
-
 
 def affResultat(a, b):
 	results = jointDistribution(a, b)
